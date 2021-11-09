@@ -22,6 +22,8 @@ int reliefPin = 11;
 int sequenceState = LOW;
 int maxLoxPressure = 16;
 
+bool loopSwitch = false;
+
 int thrust;
 
 void setup() {
@@ -48,11 +50,17 @@ void loop() {
   fuelSensorVoltage = analogRead(AnalogPinFUEL) * (5.0 / 1023.0);
   fuelPressure = fuelSensorVoltage * pressureSlope1 - pressureYintercept1;
   
-  if (loxPressure > 16){
+  if (loxPressure > 16 && !loopSwitch){
     digitalWrite(reliefPin, HIGH);
-  } else {
+    loopSwitch = true;
+  } else if(loxPressure < 15.5f && loopSwitch) {
+    digitalWrite(reliefPin, LOW);
+    loopSwitch = false;
+  }
+  else if (!loopSwitch){
     digitalWrite(reliefPin, LOW);
   }
+  
   Serial.print("FUEL: ");
   Serial.print(fuelPressure);
   Serial.print(" bar     LOX: ");
